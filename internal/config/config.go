@@ -15,6 +15,8 @@ type Config struct {
 
 	LoggerWriter io.Writer
 	LoggerOpts   *slog.HandlerOptions
+
+	DatabaseURL string
 }
 
 func Default() *Config {
@@ -29,5 +31,7 @@ func Default() *Config {
 			AddSource: false,
 			Level:     slog.LevelDebug,
 		},
+
+		DatabaseURL: "sqlite",
 	}
 }
