@@ -16,6 +16,7 @@ func New(databaseUrl string) (*sql.DB, error) {
 	// Migrations
 	for _, table := range []string{
 		models.UserTable,
+		models.ProfileTable,
 	} {
 		_, err := db.Exec(table)
 		if err != nil {
