@@ -29,7 +29,8 @@ func (s *Service) Add(name string) http.Cookie {
 
 	return http.Cookie{
 		Name:     AuthCookieName,
-		Value:    fmt.Sprintf("%s:%s", name, secret),
+		Path:     "/",
+		Value:    name + " " + secret,
 		MaxAge:   3600,
 		Secure:   false,
 		HttpOnly: true,
@@ -39,22 +40,23 @@ func (s *Service) Add(name string) http.Cookie {
 
 func (s *Service) Middleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Defer makes sure the rest of our routing stack runs after this code is executed
-		defer h.ServeHTTP(w, r)
-
 		c, err := r.Cookie(AuthCookieName)
 		if err != nil {
+			h.ServeHTTP(w, r)
 			return
 		}
 
-		var name, pass string
-		_, err = fmt.Sscanf(c.Value, "%s:%s", &name, &pass)
+		var name, token string
+		_, err = fmt.Sscan(c.Value, &name, &token)
 		if err != nil {
+			h.ServeHTTP(w, r)
 			return
 		}
 
-		if s.Register[name] == pass {
+		if s.Register[name] == token {
 			r = r.WithContext(context.WithValue(r.Context(), AuthContextKey, name))
 		}
+
+		h.ServeHTTP(w, r)
 	})
 }

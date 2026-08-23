@@ -1,4 +1,4 @@
 bin/
 
-sqlite
+sqlite.db
 cookies.txt

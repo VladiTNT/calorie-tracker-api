@@ -32,6 +32,6 @@ func Default() *Config {
 			Level:     slog.LevelDebug,
 		},
 
-		DatabaseURL: "sqlite",
+		DatabaseURL: "sqlite.db",
 	}
 }

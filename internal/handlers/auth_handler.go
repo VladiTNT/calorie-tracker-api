@@ -3,6 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"net/http"
 
@@ -10,6 +11,8 @@ import (
 	"github.com/VladiTNT/calorie-tracker-api/internal/database/queries"
 	"github.com/VladiTNT/calorie-tracker-api/pkg/auth"
 )
+
+var ErrUserNotAuthenticated = errors.New("User does not bear an authentication token.")
 
 type AuthHandler struct {
 	Logger      *slog.Logger
@@ -41,7 +44,28 @@ func (ah *AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := queries.InsertUser(ah.Database, r.Context(), &u); err != nil {
+	// Database transaction
+	tx, err := ah.Database.BeginTx(r.Context(), nil)
+	if err != nil {
+		ah.Err(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	// Insert user credentials
+	if err := queries.InsertUser(tx, r.Context(), &u); err != nil {
+		ah.Err(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	// Create a profile for the new user
+	var p models.UserProfile = models.UserProfile{Name: u.Name, TargetCalories: 0}
+	if err := queries.InsertProfile(tx, r.Context(), &p); err != nil {
+		ah.Err(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	// Commit database transaction
+	if err := tx.Commit(); err != nil {
 		ah.Err(w, err, http.StatusInternalServerError)
 		return
 	}
