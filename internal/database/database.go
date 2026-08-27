@@ -17,6 +17,7 @@ func New(databaseUrl string) (*sql.DB, error) {
 	for _, table := range []string{
 		models.UserTable,
 		models.ProfileTable,
+		models.MealTable,
 	} {
 		_, err := db.Exec(table)
 		if err != nil {
