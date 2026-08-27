@@ -1,4 +1,4 @@
-# Calorie Tracmer API
+# Calorie Tracker API
 
 This was a basic API that I was trying to build that strictly uses JSON becaues tbh I hate web dev and building UIs, after playing around with this one I figured out I hate SQL and databases almost as much as web dev lol.
 
